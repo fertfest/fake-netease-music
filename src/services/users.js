@@ -9,7 +9,6 @@ const baseUrl = '/user';
 const getAvatarUrl = async () => {
   try {
     const resp = await axiosInstance.get(`${baseUrl}/account`);
-    console.log(resp);
     return resp.data.profile.avatarUrl;
   } catch (e) {
     console.error(e);

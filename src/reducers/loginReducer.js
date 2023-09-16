@@ -1,7 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit';
-import loginService from '../services/login';
-
-const logged = loginService.userCookieExists();
 
 /**
  * 与登录相关的状态
@@ -10,7 +7,7 @@ const loginSlice = createSlice({
   name: 'login',
   initialState: {
     loginVisible: false,
-    logged,
+    logged: false,
   },
   reducers: {
     openLoginBox(state) {

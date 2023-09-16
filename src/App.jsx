@@ -1,5 +1,5 @@
 import { useLocation, Route, Routes } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Header from './components/header/Header';
 import Discover from './views/Discover';
 import TopList from './views/TopList';
@@ -14,6 +14,8 @@ import Footer from './components/footer/Footer';
 import Player from './components/player/Player';
 import SongDetail from './views/SongDetail';
 import Login from './components/login/Login';
+import loginService from './services/login';
+import { setLogged, setUnlogged } from './reducers/loginReducer';
 
 const App = () => {
   const location = useLocation();

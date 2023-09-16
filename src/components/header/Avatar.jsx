@@ -8,15 +8,28 @@ import {
 } from 'react-icons/ai';
 import { PiMedal } from 'react-icons/pi';
 import { RiVipDiamondLine, RiShutDownLine } from 'react-icons/ri';
-import { openLoginBox, setUnlogged } from '../../reducers/loginReducer';
+import { setLogged, openLoginBox, setUnlogged } from '../../reducers/loginReducer';
 import userService from '../../services/users';
 import logoutService from '../../services/logout';
+import loginService from '../../services/login';
 
 const Avatar = () => {
   const dispatch = useDispatch();
   const logged = useSelector((state) => state.login.logged);
   const [avatarUrl, setAvatarUrl] = useState(null);
   const [menuVisible, setMenuVisible] = useState(false);
+
+  // 应用还未初始化就让程序异步获取登录状态 -10：未登录 0：已登录
+  const getStatus = async () => {
+    const code = await loginService.getLoginStatus();
+    if (code === 0) {
+      dispatch(setLogged());
+    } else if (code === -10) {
+      dispatch(setUnlogged());
+    }
+  };
+  getStatus();
+
   const menuStyle = {
     display: menuVisible ? '' : 'none',
   };
@@ -41,14 +54,16 @@ const Avatar = () => {
   };
 
   useEffect(() => {
-    userService
-      .getAvatarUrl()
-      .then((data) => {
-        setAvatarUrl(data);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    if (logged) {
+      userService
+        .getAvatarUrl()
+        .then((data) => {
+          setAvatarUrl(data);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
   }, [logged]);
 
   if (!logged) {

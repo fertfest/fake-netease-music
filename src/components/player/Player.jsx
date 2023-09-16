@@ -8,8 +8,10 @@ import { Bs1Circle } from 'react-icons/bs';
 import { RiPlayList2Fill } from 'react-icons/ri';
 import ReactPlayer from 'react-player';
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { showPlayer, hidePlayer } from '../../reducers/playerReducer';
 import format from '../../utils/format';
+import defaultCoverPic from '../../assets/default_album.jpg';
 
 import songService from '../../services/song';
 
@@ -19,16 +21,24 @@ const Player = () => {
   const playerRef = useRef(null);
 
   const [songUrl, setSongUrl] = useState('');
+
+  // 小封面地址
+  const [picUrl, setPicUrl] = useState('');
+  // 正在播放的歌名
+  const [playingName, setPlayingName] = useState('');
+  // 歌手
+  const [singers, setSingers] = useState([]);
+
   // 正在播放？
   const [playing, setPlaying] = useState(false);
-
   // 已经播放了多少
   const [played, setPlayed] = useState(0);
-
   // 歌曲长度:秒
   const [seconds, setSeconds] = useState(0);
-
+  // 是否在寻道
   const [seeking, setSeeking] = useState(false);
+  // 音量
+  const [volume, setVolume] = useState(0.5);
   const dispatch = useDispatch();
 
   const togglePlaying = () => {
@@ -41,6 +51,10 @@ const Player = () => {
 
   const handleSeekChange = (e) => {
     setPlayed(parseFloat(e.target.value));
+  };
+
+  const handleVolumeChange = (e) => {
+    setVolume(Number(e.target.value));
   };
 
   const handleSeekMouseUp = (e) => {
@@ -67,81 +81,146 @@ const Player = () => {
           console.error(e);
         });
     }
+
+    if (songId) {
+      songService
+        .getPlayingInfo(songId)
+        .then(({ name, picUrl, singers }) => {
+          setPicUrl(picUrl);
+          setSingers(singers);
+          setPlayingName(name);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    }
   }, [songId]);
 
-  const style = {
-    height: visible ? '47px' : '3px',
-  };
-
   return (
-    <div
-      className="
+    <div className="w-full fixed bottom-0">
+      {/** 用于显示播放器 */}
+      <div
+        className="opacity-0 w-full h-[10px] peer"
+      />
+
+      <div
+        className="
       w-full
     bg-[#2c2b2b]
-      fixed bottom-0
-      z-100
       border-solid border-t-black border-t-[1px]
-      delay-[0.125s] duration-1000"
-      onMouseEnter={() => { dispatch(showPlayer()); }}
-      onMouseLeave={() => { dispatch(hidePlayer()); }}
-      style={style}
-    >
-      <div className="w-[980px] mx-auto h-full flex">
-        <ImPrevious title="上一首" size="20px" className="mt-[12px] mx-[8px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" />
-        {
-          !playing
-            ? <FaRegPlayCircle title="播放" className="mt-[5px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" size="33px" onClick={togglePlaying} />
-            : (
-              <FaRegPauseCircle
-                title="暂停"
-                className="mt-[5px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer"
-                size="33px"
-                onClick={togglePlaying}
+      delay-[0.125s] duration-1000
+      h-0
+      peer-hover:h-[47px]
+      hover:h-[47px]
+      "
+        onMouseEnter={() => { dispatch(showPlayer()); }}
+        onMouseLeave={() => { dispatch(hidePlayer()); }}
+      >
+        <div className="w-[980px] mx-auto h-full flex">
+          <ImPrevious title="上一首" size="20px" className="mt-[12px] mx-[8px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" />
+          {
+            !playing
+              ? <FaRegPlayCircle title="播放" className="mt-[5px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" size="33px" onClick={togglePlaying} />
+              : (
+                <FaRegPauseCircle
+                  title="暂停"
+                  className="mt-[5px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer"
+                  size="33px"
+                  onClick={togglePlaying}
+                />
+              )
+          }
+          <ReactPlayer
+            ref={playerRef}
+            url={songUrl}
+            playing={playing}
+            width="0"
+            height="0"
+            onProgress={handleProgress}
+            volume={volume}
+          />
+          <ImNext title="下一首" size="20px" className="mt-[12px] mx-[8px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" />
+          {/** 小图片 */}
+          <div className="w-[34px] h-[34px] border-solid border-[1px] border-black ml-[25px] mt-[6px] rounded-[4px]">
+            <img src={picUrl ? picUrl : defaultCoverPic} alt="封面" />
+          </div>
+          <div className="h-full w-[580px] flex-col">
+            <div className="h-1/2 w-full">
+              <span className="ml-[10px] text-[#d2d2d2] text-[12px] hover:underline">
+                <Link to={`/song?id=${songId}`}>
+                  {playingName}
+                </Link>
+              </span>
+              {
+                singers.map((singer, idx) => {
+                  if (idx !== 0) {
+                    return (
+                      <span className="text-[#7a7a7a] text-[12px] text-opacity-90 hover:underline ml-0" key={singer.id}>
+                        <Link to={`/artist?id=${singer.id}`}>{`/${singer.name}`}</Link>
+                      </span>
+                    );
+                  }
+                  return (
+                    <span className="ml-[13px] text-[#7a7a7a] text-[12px] text-opacity-90 hover:underline" key={singer.id}>
+                      <Link to={`/artist?id=${singer.id}`}>{singer.name}</Link>
+                    </span>
+                  );
+                })
+              }
+            </div>
+            <div className="h-1/2 w-full flex space justify-between text-[12px]">
+              <input
+                type="range"
+                className="w-[466px] ml-[10px] accent-[#c70c0c] "
+                min={0}
+                max={0.999999}
+                step="any"
+                value={played}
+                onMouseDown={handleSeekMouseDown}
+                onChange={handleSeekChange}
+                onMouseUp={handleSeekMouseUp}
               />
-            )
-        }
-        <ReactPlayer
-          ref={playerRef}
-          url={songUrl}
-          playing={playing}
-          width="0"
-          height="0"
-          onProgress={handleProgress}
-        />
-        <ImNext title="下一首" size="20px" className="mt-[12px] mx-[8px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" />
-        <div className="w-[34px] h-[34px] border-solid border-[1px] border-black ml-[25px] mt-[6px] rounded-[4px]" />
-        <div className="h-full w-[580px] flex-col">
-          <div className="h-1/2 w-full">
-            <span className="ml-[10px] text-[#d2d2d2] text-[12px]">Cleam</span>
-            <span className="ml-[13px] text-[#7a7a7a] text-[12px] text-opacity-90">Mister Lies</span>
+              <span className="text-white">{format(Math.floor(seconds * played))}</span>
+              <span className="text-[#686868]">/</span>
+              <span className="text-[#686868]">{format(seconds)}</span>
+            </div>
           </div>
-          <div className="h-1/2 w-full flex space justify-between text-[12px]">
-            <input
-              type="range"
-              className="w-[466px] ml-[10px] accent-[#c70c0c]"
-              min={0}
-              max={0.999999}
-              step="any"
-              value={played}
-              onMouseDown={handleSeekMouseDown}
-              onChange={handleSeekChange}
-              onMouseUp={handleSeekMouseUp}
+          <TbPictureInPicture size="20px" className="text-[#888888] mt-[11px] ml-[30px]" />
+          <AiOutlineFolderAdd size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
+          <AiOutlineShareAlt size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
+
+          <div className="w-[20px] h-[20px] mt-[11px] ml-[30px] relative">
+            {/** 音量按键 */}
+            <HiVolumeUp
+              size="20px"
+              className="text-[#888888]
+              hover:cursor-pointer
+              hover:text-[#d3d3d3]
+              peer
+              "
             />
-            <span className="text-white">{format(Math.floor(seconds * played))}</span>
-            <span className="text-[#686868]">/</span>
-            <span className="text-[#686868]">{format(seconds)}</span>
+            {/** 音量滑片 */}
+            <div
+              className="absolute w-[32px] h-[114px]  bottom-[30px] right-[-6px] bg-[#292929] border-solid border-[1px] border-[#343434] invisible peer-hover:visible hover:visible duration-500"
+            >
+              <input
+                type="range"
+                className="rotate-[270deg] w-[92px] h-[4px] bg-black accent-[#c70c0c] absolute top-[55px] right-[-32px]"
+                min={0}
+                max={1}
+                step="any"
+                value={volume}
+                onChange={handleVolumeChange}
+              />
+            </div>
           </div>
-        </div>
-        <TbPictureInPicture size="20px" className="text-[#888888] mt-[11px] ml-[30px]" />
-        <AiOutlineFolderAdd size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
-        <AiOutlineShareAlt size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
-        <HiVolumeUp size="20px" className="text-[#888888] mt-[11px] ml-[30px]" />
-        <ImLoop size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
-        <RiPlayList2Fill size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
-        {/* <FaRandom />
+          <ImLoop size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
+          <RiPlayList2Fill size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
+          {/* <FaRandom />
         <Bs1Circle /> */}
-        <div className="w-[36px] h-[14px] bg-[#1f1f1f] mt-[14px] border-solid border-black border-[1px] rounded-r-[18px] text-center">
-          <p className="text-[12px] text-[#983737] leading-[14px]">11</p>
+          <div className="w-[36px] h-[14px] bg-[#1f1f1f] mt-[14px] border-solid border-black border-[1px] rounded-r-[18px] text-center">
+            <p className="text-[12px] text-[#983737] leading-[14px]">11</p>
+          </div>
         </div>
       </div>
     </div>

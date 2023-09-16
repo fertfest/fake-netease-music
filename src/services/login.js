@@ -4,8 +4,7 @@ const baseUrl = '/login';
 
 const getQRKey = async () => {
   try {
-    const timestamp = new Date().getTime();
-    const resp = await axiosInstance.get(`${baseUrl}/qr/key?timestamp=${timestamp}`);
+    const resp = await axiosInstance.get(`${baseUrl}/qr/key`);
     const key = resp.data.data.unikey;
     return key;
   } catch (e) {
@@ -17,8 +16,7 @@ const getQRKey = async () => {
 const getQRImg = async () => {
   try {
     const key = await getQRKey();
-    const timestamp = new Date().getTime();
-    const resp = await axiosInstance.get(`${baseUrl}/qr/create?key=${key}&qrimg=1&timestamp=${timestamp}`);
+    const resp = await axiosInstance.get(`${baseUrl}/qr/create?key=${key}&qrimg=1`);
     return { key, qrimg: resp.data.data.qrimg };
   } catch (e) {
     console.error(e);
@@ -28,8 +26,7 @@ const getQRImg = async () => {
 
 const getQRStatus = async (key) => {
   try {
-    const timestamp = new Date().getTime();
-    const resp = await axiosInstance.get(`${baseUrl}/qr/check?key=${key}&timestamp=${timestamp}`);
+    const resp = await axiosInstance.get(`${baseUrl}/qr/check?key=${key}`);
     return resp.data;
   } catch (e) {
     console.error(e);
@@ -67,9 +64,20 @@ const userCookieExists = () => {
   return null;
 };
 
+// 获取登录状态
+const getLoginStatus = async () => {
+  try {
+    const resp = await axiosInstance.get(`${baseUrl}/status`);
+    return resp.data.data.account.status;
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export default {
   getQRKey,
   getQRImg,
   getQRStatus,
   userCookieExists,
+  getLoginStatus,
 };

@@ -112,7 +112,7 @@ const ContentLeft = () => {
         setData(resp);
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
       });
 
     albumService
@@ -120,7 +120,7 @@ const ContentLeft = () => {
       .then((resp) => {
         setNewAlbums(resp.slice(0, 5));
       }).catch((e) => {
-        console.log(e);
+        console.error(e);
       });
 
     toplistService
@@ -140,7 +140,7 @@ const ContentLeft = () => {
         setToplistData(toplists);
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
       });
   }, []);
 

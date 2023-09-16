@@ -14,6 +14,21 @@ const getSongUrl = async (id) => {
   return null;
 };
 
+// 用于播放器显示小图片、歌名等
+const getPlayingInfo = async (id) => {
+  try {
+    const { data } = await axiosInstance.get(`${baseUrl}/detail?ids=${id}`);
+    const { picUrl } = data.songs[0].al;
+    const { name, ar } = data.songs[0];
+    const singers = ar;
+
+    return { picUrl, name, singers };
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export default {
   getSongUrl,
+  getPlayingInfo,
 };

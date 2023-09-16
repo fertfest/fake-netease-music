@@ -11,7 +11,7 @@ const BannerSlider = () => {
         setBanners(newBanners);
       })
       .catch((e) => {
-        console.log(e);
+        console.error(e);
       });
   }, []);
 
