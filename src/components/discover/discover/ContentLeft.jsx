@@ -4,13 +4,12 @@ import { AiOutlinePlayCircle, AiOutlineFolderAdd } from 'react-icons/ai';
 import { BiHeadphone, BiPlayCircle } from 'react-icons/bi';
 import { FiFolderPlus } from 'react-icons/fi';
 import { MdAdd } from 'react-icons/md';
+import { useDispatch } from 'react-redux';
 import playlistService from '../../../services/playlists';
 import albumService from '../../../services/albums';
 import toplistService from '../../../services/toplists';
-import songService from '../../../services/song';
 
 import { setSongId } from '../../../reducers/playerReducer';
-import { useDispatch } from 'react-redux';
 
 const TopListItem = ({
   toplistName,

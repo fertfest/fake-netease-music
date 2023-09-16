@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const toBackend = ['/banner', '/top', '/playlist', '/login', '/user', '/song/url', '/song/detail', '/logout'];
+const toBackend = ['/banner', '/top', '/playlist', '/login', '/user', '/song/url', '/song/detail', '/logout', '/artist', '/dj/toplist'];
 const proxyObject = {};
 toBackend.every((url) => {
   proxyObject[url] = 'http://localhost:3000';
