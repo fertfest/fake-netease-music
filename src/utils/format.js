@@ -11,4 +11,6 @@ const format = (seconds) => {
   return `${mm}:${ss}`;
 };
 
+export const formatByMilliseconds = (milliseconds) => format(Math.floor(milliseconds / 1000));
+
 export default format;

@@ -9,7 +9,7 @@ import playlistService from '../../../services/playlists';
 import albumService from '../../../services/albums';
 import toplistService from '../../../services/toplists';
 
-import { setSongId } from '../../../reducers/playerReducer';
+import { playOneSong } from '../../../reducers/playerReducer';
 
 const TopListItem = ({
   toplistName,
@@ -19,7 +19,7 @@ const TopListItem = ({
 }) => {
   const dispatch = useDispatch();
   const handlePlay = (songId) => () => {
-    dispatch(setSongId(songId));
+    dispatch(playOneSong(songId));
   };
 
   return (

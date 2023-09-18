@@ -32,7 +32,7 @@ const App = () => {
             : ''
         }
         <div className="border-solid border-[1px] border-[#d3d3d3]">
-          <div className="mx-auto w-[980px] bg-white ">
+          <div className="mx-auto w-[982px] bg-white ">
             <Routes>
               <Route path="/" element={<Discover />} />
               <Route path="/discover" element={<Discover />} />

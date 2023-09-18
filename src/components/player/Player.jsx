@@ -9,19 +9,23 @@ import { RiPlayList2Fill } from 'react-icons/ri';
 import ReactPlayer from 'react-player';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { showPlayer, hidePlayer } from '../../reducers/playerReducer';
+import { showPlayer, hidePlayer, togglePlaying as togglePlayingActionProducer } from '../../reducers/playerReducer';
 import format from '../../utils/format';
 import defaultCoverPic from '../../assets/default_album.jpg';
 
 import songService from '../../services/song';
 
 const Player = () => {
-  const visible = useSelector((state) => state.player.playerVisible);
+  // 歌曲id
   const songId = useSelector((state) => state.player.songId);
+  // 播放器是否可见
+  const visible = useSelector((state) => state.player.playerVisible);
+  // 小通知框是否可见
+  const notificationVisible = useSelector((state) => state.player.notificationVisible);
   const playerRef = useRef(null);
 
+  // 歌曲文件地址
   const [songUrl, setSongUrl] = useState('');
-
   // 小封面地址
   const [picUrl, setPicUrl] = useState('');
   // 正在播放的歌名
@@ -30,7 +34,7 @@ const Player = () => {
   const [singers, setSingers] = useState([]);
 
   // 正在播放？
-  const [playing, setPlaying] = useState(false);
+  const playing = useSelector((state) => state.player.playing);
   // 已经播放了多少
   const [played, setPlayed] = useState(0);
   // 歌曲长度:秒
@@ -42,7 +46,7 @@ const Player = () => {
   const dispatch = useDispatch();
 
   const togglePlaying = () => {
-    setPlaying(!playing);
+    dispatch(togglePlayingActionProducer());
   };
 
   const handleSeekMouseDown = () => {
@@ -67,6 +71,16 @@ const Player = () => {
     if (!seeking) {
       setPlayed(state.played);
     }
+  };
+
+  const style = {
+    // display: visible ? '' : 'none',
+    height: visible ? '47px' : '3px',
+    // height: '47px',
+  };
+
+  const notificationStyle = {
+    display: notificationVisible ? '' : 'none',
   };
 
   useEffect(() => {
@@ -97,7 +111,11 @@ const Player = () => {
   }, [songId]);
 
   return (
-    <div className="w-full fixed bottom-0">
+    <div
+      className="w-full fixed bottom-0"
+      onMouseEnter={() => { dispatch(showPlayer()); }}
+      onMouseLeave={() => { dispatch(hidePlayer()); }}
+    >
       {/** 用于显示播放器 */}
       <div
         className="opacity-0 w-full h-[10px] peer"
@@ -109,14 +127,11 @@ const Player = () => {
     bg-[#2c2b2b]
       border-solid border-t-black border-t-[1px]
       delay-[0.125s] duration-1000
-      h-0
-      peer-hover:h-[47px]
-      hover:h-[47px]
+      h-[47px]
       "
-        onMouseEnter={() => { dispatch(showPlayer()); }}
-        onMouseLeave={() => { dispatch(hidePlayer()); }}
+        style={style}
       >
-        <div className="w-[980px] mx-auto h-full flex">
+        <div className="w-[980px] mx-auto h-full flex relative">
           <ImPrevious title="上一首" size="20px" className="mt-[12px] mx-[8px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" />
           {
             !playing
@@ -215,11 +230,31 @@ const Player = () => {
             </div>
           </div>
           <ImLoop size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
-          <RiPlayList2Fill size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
           {/* <FaRandom />
         <Bs1Circle /> */}
-          <div className="w-[36px] h-[14px] bg-[#1f1f1f] mt-[14px] border-solid border-black border-[1px] rounded-r-[18px] text-center">
-            <p className="text-[12px] text-[#983737] leading-[14px]">11</p>
+
+          {/** 播放列表按钮 */}
+          <div className="w-[50px] h-full flex">
+            <RiPlayList2Fill size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
+            <div className="w-[36px] h-[14px] bg-[#1f1f1f] mt-[14px] border-solid border-black border-[1px] rounded-r-[18px] text-center">
+              <p className="text-[12px] text-[#983737] leading-[14px]">11</p>
+            </div>
+          </div>
+
+          <div
+            className="
+            absolute top-[-50px] bg-[#313131]
+            right-[-10px] w-[152px] h-[40px]
+            border-solid border-[#000000] border-[1px]
+            rounded-md text-center"
+            style={notificationStyle}
+          >
+            <div className="absolute bottom-[-10px] right-[20px]  border-t-[10px] border-l-[10px] border-r-[10px] border-transparent border-t-[#313131]">
+
+            </div>
+            <span className="text-white text-[14px] leading-[40px]">
+              已开始播放
+            </span>
           </div>
         </div>
       </div>

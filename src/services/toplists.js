@@ -16,4 +16,12 @@ const discoverToplists = async () => {
   return all.filter((item) => item.name === '飙升榜' || item.name === '新歌榜' || item.name === '原创榜');
 };
 
-export default { discoverToplists };
+/**
+ * 获取榜单详情，但是因为榜单也属于playlist，所以需要调playlist想关的接口
+ */
+const getToplistDetail = async (id) => {
+  const resp = await axiosInstance.get(`/playlist/detail?id=${id}`);
+  return resp.data.playlist;
+};
+
+export default { getAllToplists, discoverToplists, getToplistDetail };
