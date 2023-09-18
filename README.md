@@ -1,8 +1,18 @@
-# React + Vite
+# 仿网易云音乐PC web端
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 后端
+感谢[@Binaryify](https://github.com/Binaryify)大佬提供的后端API。
 
-Currently, two official plugins are available:
+github: https://github.com/Binaryify/NeteaseCloudMusicApi
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+website: https://neteasecloudmusicapi-docs.4everland.app/#/
+
+
+
+## 说明
+
+项目仅供学习交流使用！
+为了仿得像一点，许多素材都直接用了网易云音乐官方的，如果项目有侵权行为请联系：
+
+- 邮箱: 2320052362@qq.com！
+- QQ: 2320052362
