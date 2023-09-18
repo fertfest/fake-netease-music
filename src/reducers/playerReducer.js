@@ -42,6 +42,9 @@ const playerSlice = createSlice({
     unlockPlayer(state) {
       return { ...state, playerLock: false };
     },
+    toggleLockPlayer(state) {
+      return { ...state, playerLock: !state.playerLock };
+    },
     setSongId(state, action) {
       return { ...state, songId: action.payload };
     },
@@ -72,6 +75,7 @@ export const {
   togglePlayer,
   lockPlayer,
   unlockPlayer,
+  toggleLockPlayer,
   setSongId,
   togglePlaying,
   setPlaying,

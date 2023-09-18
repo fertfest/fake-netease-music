@@ -4,12 +4,12 @@ import { ImPrevious, ImNext, ImLoop } from 'react-icons/im';
 import { TbPictureInPicture } from 'react-icons/tb';
 import { HiVolumeUp } from 'react-icons/hi';
 import { AiOutlineFolderAdd, AiOutlineShareAlt } from 'react-icons/ai';
-import { Bs1Circle } from 'react-icons/bs';
+import { Bs1Circle, BsFillLockFill, BsFillUnlockFill } from 'react-icons/bs';
 import { RiPlayList2Fill } from 'react-icons/ri';
 import ReactPlayer from 'react-player';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { showPlayer, hidePlayer, togglePlaying as togglePlayingActionProducer } from '../../reducers/playerReducer';
+import { showPlayer, hidePlayer, togglePlaying as togglePlayingActionProducer, toggleLockPlayer } from '../../reducers/playerReducer';
 import format from '../../utils/format';
 import defaultCoverPic from '../../assets/default_album.jpg';
 
@@ -43,6 +43,8 @@ const Player = () => {
   const [seeking, setSeeking] = useState(false);
   // 音量
   const [volume, setVolume] = useState(0.5);
+  // 右上角小锁出于锁定状态？
+  const [locked, setLocked] = useState(false);
   const dispatch = useDispatch();
 
   const togglePlaying = () => {
@@ -124,6 +126,7 @@ const Player = () => {
       <div
         className="
       w-full
+      relative
     bg-[#2c2b2b]
       border-solid border-t-black border-t-[1px]
       delay-[0.125s] duration-1000
@@ -241,6 +244,7 @@ const Player = () => {
             </div>
           </div>
 
+          {/** 在页面中直接点击播放按钮时出现的小通知框 */}
           <div
             className="
             absolute top-[-50px] bg-[#313131]
@@ -255,6 +259,32 @@ const Player = () => {
             <span className="text-white text-[14px] leading-[40px]">
               已开始播放
             </span>
+          </div>
+
+        </div>
+
+        {/** 播放器最右侧的小锁 */}
+        <div
+          className="w-[50px] h-[14px] absolute top-[-14px] right-[28px] flex"
+        >
+          <div className="border-transparent border-t-[14px] border-b-[14px] w-0 h-0 border-r-[14px] border-r-[#2c2b2b]">
+
+          </div>
+          <div className="w-[22px] h-full bg-[#2c2b2b] relative pl-[5px]">
+            <button
+              type="button"
+              onClick={() => { setLocked(!locked); dispatch(toggleLockPlayer()); }}
+              className="block"
+            >
+              {
+                locked
+                  ? <BsFillLockFill className="text-[#828282]" size="12px" />
+                  : <BsFillUnlockFill className="text-[#828282]" size="12px" />
+              }
+            </button>
+          </div>
+          <div className="border-transparent border-t-[14px] border-b-[14px] w-0 h-0 border-l-[14px] border-l-[#2c2b2b]">
+
           </div>
         </div>
       </div>
