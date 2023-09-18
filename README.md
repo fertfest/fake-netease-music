@@ -1,5 +1,16 @@
 # 仿网易云音乐PC web端
 
+## 技术相关
+
+- 核心: [React](https://github.com/facebook/react)
+- 构建工具：[Vite](https://github.com/vitejs/vite)
+- 路由: [React Router](https://github.com/remix-run/react-router)
+- 状态管理: [Redux](https://github.com/reduxjs/redux)/[React-Redux](https://github.com/reduxjs/react-redux)/[Redux-Toolkit](https://github.com/reduxjs/redux-toolkit)
+- UI: [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss)
+- 网络请求: [Axios](https://github.com/axios/axios)
+- 播放器组件: [ReactPlayer](https://github.com/CookPete/react-player)
+- 编码规范: [Airbnb JS/JSX/React](https://github.com/airbnb/javascript)
+
 ## 后端
 感谢[@Binaryify](https://github.com/Binaryify)大佬提供的后端API。
 
