@@ -1,27 +1,53 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { FaRegPlayCircle, FaRandom, FaRegPauseCircle } from 'react-icons/fa';
+import { useEffect, useRef, useState } from 'react';
+import ReactPlayer from 'react-player';
+import { Link } from 'react-router-dom';
+
+import {
+  FaRegPlayCircle,
+  // FaRandom,
+  FaRegPauseCircle,
+} from 'react-icons/fa';
 import { ImPrevious, ImNext, ImLoop } from 'react-icons/im';
 import { TbPictureInPicture } from 'react-icons/tb';
 import { HiVolumeUp } from 'react-icons/hi';
-import { AiOutlineFolderAdd, AiOutlineShareAlt } from 'react-icons/ai';
-import { Bs1Circle, BsFillLockFill, BsFillUnlockFill } from 'react-icons/bs';
+import { AiOutlineFolderAdd, AiOutlineShareAlt, AiOutlineDownload } from 'react-icons/ai';
+import {
+  // Bs1Circle,
+  BsFillLockFill,
+  BsFillUnlockFill,
+  BsTrash,
+} from 'react-icons/bs';
 import { RiPlayList2Fill } from 'react-icons/ri';
-import ReactPlayer from 'react-player';
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { showPlayer, hidePlayer, togglePlaying as togglePlayingActionProducer, toggleLockPlayer } from '../../reducers/playerReducer';
+import { GiPlayButton } from 'react-icons/gi';
+import {
+  showPlayer,
+  hidePlayer,
+  togglePlaying as togglePlayingActionProducer,
+  toggleLockPlayer,
+  playOneSong,
+  deleteOnePlaylist,
+  clearPlaylist,
+  showPlaylist,
+  hidePlaylist,
+} from '../../reducers/playerReducer';
 import format from '../../utils/format';
+import songService from '../../services/song';
+import lyricService from '../../services/lyric';
+import FormatAuthors from '../common/FormatAuthors';
 import defaultCoverPic from '../../assets/default_album.jpg';
 
-import songService from '../../services/song';
-
 const Player = () => {
+  // 播放列表数据
+  const playlistData = useSelector((state) => state.player.playlist);
   // 歌曲id
   const songId = useSelector((state) => state.player.songId);
   // 播放器是否可见
   const visible = useSelector((state) => state.player.playerVisible);
   // 小通知框是否可见
   const notificationVisible = useSelector((state) => state.player.notificationVisible);
+  // 播放列表是否可见
+  const playlistVisible = useSelector((state) => state.player.playlistVisible);
   const playerRef = useRef(null);
 
   // 歌曲文件地址
@@ -45,6 +71,8 @@ const Player = () => {
   const [volume, setVolume] = useState(0.5);
   // 右上角小锁出于锁定状态？
   const [locked, setLocked] = useState(false);
+  // 歌词
+  const [lyric, setLyric] = useState([]);
   const dispatch = useDispatch();
 
   const togglePlaying = () => {
@@ -110,6 +138,14 @@ const Player = () => {
           console.error(e);
         });
     }
+
+    if (songId) {
+      lyricService
+        .getLyric(songId)
+        .then((resp) => {
+          setLyric(resp);
+        });
+    }
   }, [songId]);
 
   return (
@@ -160,7 +196,7 @@ const Player = () => {
           <ImNext title="下一首" size="20px" className="mt-[12px] mx-[8px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" />
           {/** 小图片 */}
           <div className="w-[34px] h-[34px] border-solid border-[1px] border-black ml-[25px] mt-[6px] rounded-[4px]">
-            <img src={picUrl ? picUrl : defaultCoverPic} alt="封面" />
+            <img src={picUrl || defaultCoverPic} alt="封面" />
           </div>
           <div className="h-full w-[580px] flex-col">
             <div className="h-1/2 w-full">
@@ -238,9 +274,16 @@ const Player = () => {
 
           {/** 播放列表按钮 */}
           <div className="w-[50px] h-full flex">
-            <RiPlayList2Fill size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
+            <button
+              type="button"
+              title="播放列表"
+              className="ml-[7px] mb-[4px]"
+              onClick={() => { dispatch(showPlaylist()); }}
+            >
+              <RiPlayList2Fill size="20px" className="text-[#888888]" />
+            </button>
             <div className="w-[36px] h-[14px] bg-[#1f1f1f] mt-[14px] border-solid border-black border-[1px] rounded-r-[18px] text-center">
-              <p className="text-[12px] text-[#983737] leading-[14px]">11</p>
+              <p className="text-[12px] text-[#983737] leading-[14px]">{playlistData.length}</p>
             </div>
           </div>
 
@@ -261,6 +304,112 @@ const Player = () => {
             </span>
           </div>
 
+          {/** 播放列表框 */}
+          <div
+            className={`
+            w-[986px] h-[301px]
+            absolute
+            bottom-[47px] left-[10px]
+            overflow-hidden
+            rounded-tl-md
+            rounded-tr-md
+            flex-col
+            ${playlistVisible ? 'visible' : 'invisible'}
+            `}
+          >
+            {/** 播放列表Header */}
+            <div className="w-full h-[41px] bg-[#1f1f1f] flex">
+              <h3 className="text-[14px] text-[#e2e2e2] leading-[41px] ml-[25px] w-[200px]">
+                播放列表(
+                {playlistData.length}
+                )
+              </h3>
+              <div className="w-[80px] h-[16px] ml-[180px] mt-[10px] text-[#9b9b9b] hover:text-[#e2e2e2] hover:underline flex border-solid border-r-[1px] border-black">
+                <button type="button" className="w-[90px] absolute flex">
+                  <AiOutlineFolderAdd size="20px" />
+                  <p className="text-[12px] hover:underline pt-[2px] pl-[5px]">
+                    收藏全部
+                  </p>
+                </button>
+              </div>
+              <div className="w-[100px] h-[16px] mt-[10px] text-[#9b9b9b] hover:text-[#e2e2e2] hover:underline flex border-solid border-l-[1px] border-[#2c2c2c] pl-[5px]">
+                <button type="button" className="w-[90px] absolute flex" onClick={() => { dispatch(clearPlaylist()); }}>
+                  <BsTrash size="16px" className="mt-[3px]" />
+                  <p className="text-[12px] hover:underline pt-[2px] pl-[5px]">
+                    清除
+                  </p>
+                </button>
+              </div>
+              <div className="w-[346px] h-full text-center">
+                <h3 className="leading-[41px] text-[#ffffff]">
+                  {playingName}
+                </h3>
+              </div>
+              <div className="w-[15px] text-[#666666] text-[23px] hover:text-[#7c7c7c] ml-[20px] pt-[2px]">
+                <button type="button" onClick={() => { dispatch(hidePlaylist()); }}>
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/** 播放列表内容 */}
+            <div className="w-full h-[260px] flex">
+              <ul className="w-[559px] h-full overflow-scroll player_scroll bg-[#202224]">
+                {
+                  playlistData.map((song) => (
+                    <li
+                      key={song.id}
+                      className={`h-[28px] w-full flex relative group hover:bg-[#0f0f0f] ${song.id === songId ? 'bg-[#0f0f0f]' : ''}`}
+                    >
+                      <input type="button" className="absolute w-full h-full hover:cursor-pointer" onClick={() => { dispatch(playOneSong(song)); }} />
+                      <div className="w-[24px] pt-[5px]">
+                        {
+                          songId === song.id
+                            ? <GiPlayButton className="text-[#b80a0a] ml-[5px] mt-[1px]" />
+                            : ''
+                        }
+                      </div>
+                      <p className="text-[12px] text-[#cccccc] whitespace-nowrap overflow-hidden text-ellipsis w-[266px] h-full ml-[3px] leading-[28px]">
+                        {song.name}
+                      </p>
+                      <div className="w-[88px] h-full text-[#9b9b9b] ml-[10px] gap-[5px] pt-[4px] invisible group-hover:visible">
+                        <button type="button" title="收藏" className="hover:text-[#e2e2e2] relative z-1">
+                          <AiOutlineFolderAdd />
+                        </button>
+                        <button type="button" title="转发" className="hover:text-[#e2e2e2] relative z-1">
+                          <AiOutlineShareAlt />
+                        </button>
+                        <button type="button" title="下载" className="hover:text-[#e2e2e2] relative z-1">
+                          <AiOutlineDownload />
+                        </button>
+                        <button type="button" title="删除" className="hover:text-[#e2e2e2] relative z-1" onClick={() => { dispatch(deleteOnePlaylist(song.id)); }}>
+                          <BsTrash />
+                        </button>
+                      </div>
+                      <div className="w-[80px] h-full">
+                        <p className="text-[12px] text-[#898989] whitespace-nowrap overflow-hidden text-ellipsis leading-[28px]">
+                          <FormatAuthors ar={song.ar} />
+                        </p>
+                      </div>
+                    </li>
+                  ))
+                }
+              </ul>
+
+              {/** 歌词 */}
+              <div className="w-[430px] h-full bg-[#1a1a1a] overflow-scroll player_scroll">
+                <div
+                  className="w-[380px] h-[220px] mx-auto ml-[20px]  text-center "
+                >
+                  {
+                    // eslint-disable-next-line react/no-array-index-key
+                    lyric.map((line, index) => <p className="text-[12px] text-white my-[10px]" key={index}>{line}</p>)
+                  }
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
 
         {/** 播放器最右侧的小锁 */}

@@ -18,8 +18,8 @@ const TopListItem = ({
   coverImgUrl,
 }) => {
   const dispatch = useDispatch();
-  const handlePlay = (songId) => () => {
-    dispatch(playOneSong(songId));
+  const handlePlay = (song) => () => {
+    dispatch(playOneSong(song));
   };
 
   return (
@@ -54,7 +54,7 @@ const TopListItem = ({
                       type="button"
                       className="hover:cursor-pointer absolute w-full h-full"
                       title="播放"
-                      onClick={handlePlay(item.id)}
+                      onClick={handlePlay(item)}
                     />
                     <AiOutlinePlayCircle size="20px" className="mt-[7px]" />
                   </div>

@@ -12,7 +12,10 @@ import { FaShareSquare } from 'react-icons/fa';
 import toplistService from '../../services/toplists';
 import formatDate from '../../utils/formateDate';
 import { formatByMilliseconds } from '../../utils/format';
-import formatAuthors from '../../utils/formatAuthors';
+import FormatAuthors from '../common/FormatAuthors';
+
+import { addToPlayerPlaylist, playOneSong } from '../../reducers/playerReducer';
+import { useDispatch } from 'react-redux';
 
 const Header = ({ data }) => (
   <div className="w-[660px] h-[158px] mx-auto my-[40px] flex">
@@ -112,6 +115,16 @@ const ListHeader = ({ data }) => (
 );
 
 const SongList = ({ data }) => {
+  const dispatch = useDispatch();
+  const handleAddSong = (song) => () => {
+    dispatch(addToPlayerPlaylist([song]));
+  };
+
+  const handlePlay = (song) => () => {
+    console.log(song);
+    dispatch(playOneSong(song));
+  };
+
   if (!data || !data.tracks) {
     return '';
   }
@@ -138,14 +151,14 @@ const SongList = ({ data }) => {
             data.tracks.map((song, idx) => {
               if (idx < 3) {
                 return (
-                  <tr key={song.id} className="h-[73px] odd:bg-[#f7f7f7]">
+                  <tr key={song.id} className="h-[73px] odd:bg-[#f7f7f7]  group">
                     <th className="w-[78px]">
                       <span className="text-[#999999] text-[12px] font-normal">{idx + 1}</span>
                     </th>
                     <th className="w-[326px] flex">
                       <img src={song.al.picUrl} className="w-[50px] h-[50px] mt-[13px]" alt="作者" />
                       <div className="h-full w-[30px] pt-[28px] ml-[15px] relative">
-                        <button type="button" title="播放">
+                        <button type="button" title="播放" onClick={handlePlay(song)}>
                           <AiOutlinePlayCircle size="20px" className="text-[#b2b2b2] hover:text-[#666666]" />
                         </button>
                       </div>
@@ -153,23 +166,37 @@ const SongList = ({ data }) => {
                         <p className="text-[#333333] text-[12px] hover:underline font-normal pt-[29px] pl-[3px]">{song.name}</p>
                       </Link>
                     </th>
-                    <th className="w-[91px] text-left text-[12px] font-normal pl-[8px]">
-                      {formatByMilliseconds(song.dt)}
+                    <th className="w-[91px] text-left text-[12px] font-normal pl-[8px] relative">
+                      <div className="absolute w-full group-hover:visible invisible flex">
+                        <button type="button" onClick={handleAddSong(song)}>
+                          <AiOutlinePlus className="text-[#999999]" size="15px" />
+                        </button>
+                        <button type="button">
+                          <AiOutlineFolderAdd className="text-[#999999]" size="15px" />
+                        </button>
+                        <button type="button" className="block ml-[2px]">
+                          <FaShareSquare className="text-[#999999]" size="13px" />
+                        </button>
+                        <button type="button">
+                          <AiOutlineDownload className="text-[#999999]" size="15px" />
+                        </button>
+                      </div>
+                      <span className="visible group-hover:invisible">{formatByMilliseconds(song.dt)}</span>
                     </th>
                     <th className="w-[173px] text-left text-[12px] font-normal pl-[8px]">
-                      {formatAuthors(song.ar)}
+                      <FormatAuthors ar={song.ar} />
                     </th>
                   </tr>
                 );
               }
               return (
-                <tr key={song.id} className="h-[30px] odd:bg-[#f7f7f7]">
+                <tr key={song.id} className="h-[30px] odd:bg-[#f7f7f7] group">
                   <th className="w-[78px] h-full">
                     <span className="text-[#999999] text-[12px] font-normal">{idx + 1}</span>
                   </th>
                   <th className="w-[326px] h-[30px] flex pt-[6px] text-left">
                     <div className="h-full w-[30px]">
-                      <button type="button" title="播放" className="">
+                      <button type="button" title="播放" onClick={handlePlay(song)}>
                         <AiOutlinePlayCircle size="20px" className="text-[#b2b2b2] hover:text-[#666666] " />
                       </button>
                     </div>
@@ -177,11 +204,25 @@ const SongList = ({ data }) => {
                       <p className="text-[#333333] w-[250px] h-[full] whitespace-nowrap text-[12px] hover:underline font-normal pt-[2px] pl-[3px] overflow-hidden text-ellipsis">{song.name}</p>
                     </Link>
                   </th>
-                  <th className="w-[91px] text-left text-[12px] font-normal pl-[8px]">
-                    {formatByMilliseconds(song.dt)}
+                  <th className="w-[91px] text-left text-[12px] font-normal pl-[8px] relative">
+                    <div className="absolute w-full group-hover:visible invisible flex">
+                      <button type="button" onClick={handleAddSong(song)}>
+                        <AiOutlinePlus className="text-[#999999]" size="15px" />
+                      </button>
+                      <button type="button">
+                        <AiOutlineFolderAdd className="text-[#999999]" size="15px" />
+                      </button>
+                      <button type="button" className="block ml-[2px]">
+                        <FaShareSquare className="text-[#999999]" size="13px" />
+                      </button>
+                      <button type="button">
+                        <AiOutlineDownload className="text-[#999999]" size="15px" />
+                      </button>
+                    </div>
+                    <span className="visible group-hover:invisible">{formatByMilliseconds(song.dt)}</span>
                   </th>
                   <th className="w-[173px] text-left text-[12px] font-normal pl-[8px]">
-                    <p className="whitespace-nowrap h-[30px] w-[173px] overflow-hidden text-ellipsis leading-[30px]">{formatAuthors(song.ar)}</p>
+                    <p className="whitespace-nowrap h-[30px] w-[173px] overflow-hidden text-ellipsis leading-[30px]"><FormatAuthors ar={song.ar} /></p>
                   </th>
                 </tr>
               );
