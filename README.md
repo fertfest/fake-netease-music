@@ -20,7 +20,7 @@ website: https://neteasecloudmusicapi-docs.4everland.app/#/
 
 ## Todo
 - 播放器连续播放
-- 播放器随机播放、列表训话、单曲循环
+- 播放器随机播放、列表循环、单曲循环
 - 歌曲播放权限识别
 - 歌单界面
 - 主播电台界面
