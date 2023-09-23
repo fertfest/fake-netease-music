@@ -2,11 +2,12 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 import 'dotenv/config'
+console.log(process.env.PROXY_URL);
 
 const toBackend = ['/banner', '/top', '/playlist', '/login', '/user', '/song/url', '/song/detail', '/logout', '/artist', '/dj/toplist', '/lyric'];
 const proxyObject = {};
 toBackend.every((url) => {
-  proxyObject[url] = process.env.PROXY_URL;
+  proxyObject[url] = "http://localhost:9000";
   return true;
 });
 

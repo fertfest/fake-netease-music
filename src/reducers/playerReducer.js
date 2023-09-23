@@ -11,7 +11,7 @@ const updatePlaylistInLocalStorage = (songs) => {
 
 const getPlaylistInLocalStorage = () => JSON.parse(localStorage.getItem('playlist'));
 
-const initPlaylist = getPlaylistInLocalStorage();
+const initPlaylist = getPlaylistInLocalStorage() || [];
 
 /**
  * 与底部播放条相关的状态
