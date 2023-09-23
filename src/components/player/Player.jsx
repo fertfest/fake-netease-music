@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 import {
   FaRegPlayCircle,
-  // FaRandom,
+  FaRandom,
   FaRegPauseCircle,
 } from 'react-icons/fa';
 import { ImPrevious, ImNext, ImLoop } from 'react-icons/im';
@@ -13,7 +13,7 @@ import { TbPictureInPicture } from 'react-icons/tb';
 import { HiVolumeUp } from 'react-icons/hi';
 import { AiOutlineFolderAdd, AiOutlineShareAlt, AiOutlineDownload } from 'react-icons/ai';
 import {
-  // Bs1Circle,
+  Bs1Circle,
   BsFillLockFill,
   BsFillUnlockFill,
   BsTrash,
@@ -30,6 +30,9 @@ import {
   clearPlaylist,
   showPlaylist,
   hidePlaylist,
+  setTimeoutId,
+  setPlaying,
+  setSongId,
 } from '../../reducers/playerReducer';
 import format from '../../utils/format';
 import songService from '../../services/song';
@@ -38,6 +41,8 @@ import FormatAuthors from '../common/FormatAuthors';
 import defaultCoverPic from '../../assets/default_album.jpg';
 
 const Player = () => {
+  // 播放模式对应名称
+  const modeTitles = ['列表循环', '随机播放', '单曲循环'];
   // 播放列表数据
   const playlistData = useSelector((state) => state.player.playlist);
   // 歌曲id
@@ -48,6 +53,10 @@ const Player = () => {
   const notificationVisible = useSelector((state) => state.player.notificationVisible);
   // 播放列表是否可见
   const playlistVisible = useSelector((state) => state.player.playlistVisible);
+  // 切换播放模式后的小提示框是否可见
+  const [playingModeVisible, setPlayingModeVisible] = useState(false);
+  // 小提示框计时器ID
+  let playingModeTimeoutId;
   const playerRef = useRef(null);
 
   // 歌曲文件地址
@@ -69,6 +78,8 @@ const Player = () => {
   const [seeking, setSeeking] = useState(false);
   // 音量
   const [volume, setVolume] = useState(0.5);
+  // 播放模式 0-列表循环 1-随机播放 2-单曲循环
+  const [playingMode, setPlayingMode] = useState(0);
   // 右上角小锁出于锁定状态？
   const [locked, setLocked] = useState(false);
   // 歌词
@@ -105,8 +116,8 @@ const Player = () => {
 
   const style = {
     // display: visible ? '' : 'none',
-    height: visible ? '47px' : '3px',
-    // height: '47px',
+    // height: visible ? '47px' : '3px',
+    height: '47px',
   };
 
   const notificationStyle = {
@@ -184,6 +195,7 @@ const Player = () => {
                 />
               )
           }
+          {/** 播放器组件 */}
           <ReactPlayer
             ref={playerRef}
             url={songUrl}
@@ -192,6 +204,26 @@ const Player = () => {
             height="0"
             onProgress={handleProgress}
             volume={volume}
+            loop={playingMode === 2}
+            onEnded={() => {
+              try {
+                if (!playlistData) {
+                  setPlaying(false);
+                } else if (playlistData.length === 1) {
+                  setSeconds(0);
+                } else if (playingMode === 1) {
+                  const idx = Math.floor(Math.random() * playlistData.length);
+                  dispatch(setSongId(playlistData[idx].id));
+                } else if (playingMode === 0) {
+                  const idx = playlistData.findIndex((song) => song.id === songId);
+                  dispatch(setSongId(playlistData[idx + 1].id));
+                } else {
+                  throw new Error('单曲循环模式下触发onEnded事件');
+                }
+              } catch (e) {
+                console.error(e);
+              }
+            }}
           />
           <ImNext title="下一首" size="20px" className="mt-[12px] mx-[8px] hover:text-[#fafafa] text-[#535353] hover:cursor-pointer" />
           {/** 小图片 */}
@@ -268,9 +300,39 @@ const Player = () => {
               />
             </div>
           </div>
-          <ImLoop size="20px" className="text-[#888888] mt-[11px] ml-[7px]" />
-          {/* <FaRandom />
-        <Bs1Circle /> */}
+          {/** 播放器模式切换按钮和通知框 */}
+          <div className="relative w-[30px] h-[30px]">
+            <div className={`absolute z-10 ${playingModeVisible ? 'visible' : 'invisible'}
+            w-[75px] h-[32px]
+            bg-[#191919] opacity-90
+            -top-9 -left-5
+            border-black border-solid border-[1px]
+            rounded-sm
+            text-white text-[14px] text-center
+            pt-[6px]`}
+            >
+              <span>{modeTitles[playingMode]}</span>
+            </div>
+            <div className="text-[#888888]">
+              <button
+                type="button"
+                className="w-full h-full"
+                onClick={() => {
+                  setPlayingMode(playingMode === 2 ? 0 : playingMode + 1);
+                  setPlayingModeVisible(true);
+                  clearTimeout(playingModeTimeoutId);
+                  playingModeTimeoutId = setTimeout(() => {
+                    setPlayingModeVisible(false);
+                  }, 1500);
+                }}
+                title={modeTitles[playingMode === 2 ? 0 : playingMode + 1]}
+              >
+                <ImLoop size="20px" className={`mt-[11px] ml-[7px] absolute top-0 left-0 ${playingMode === 2 ? 'visible' : 'invisible'}`} />
+                <FaRandom size="20px" className={`mt-[11px] ml-[7px] absolute top-0 left-0  ${playingMode === 0 ? 'visible' : 'invisible'}`} />
+                <Bs1Circle size="20px" className={`mt-[11px] ml-[7px] absolute top-0 left-0  ${playingMode === 1 ? 'visible' : 'invisible'}`} />
+              </button>
+            </div>
+          </div>
 
           {/** 播放列表按钮 */}
           <div className="w-[50px] h-full flex">
