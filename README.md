@@ -20,6 +20,7 @@ website: https://neteasecloudmusicapi-docs.4everland.app/#/
 
 ## Todo
 - 歌曲播放权限识别
+- 手机号登录/注册
 - 歌单界面
 - 主播电台界面
 - 歌手界面
